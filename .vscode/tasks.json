@@ -1,0 +1,91 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "GDK Clean",
+      "type": "shell",
+      "command": "${env:GDK}\\bin\\make",
+      "args": [
+        "-f",
+        "makefile",
+        "clean"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "GDK Build & Run",
+      "type": "shell",
+      "command": "${env:GDK}\\bin\\make -f makefile release && \"${env:REGEN}\\regen.exe\" \"${workspaceFolder}\\out\\rom.bin\"",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "GDK Clean, Build & Run",
+      "dependsOn": [
+        "GDK Clean",
+        "GDK Build & Run"
+      ],
+      "dependsOrder": "sequence",
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "(MacOS)GDK Clean",
+      "type": "shell",
+      "command": "rm",
+      "args": [
+        "-rf",
+        "${workspaceFolder}/out"
+      ],
+      "group": {
+        "kind": "clean",
+        "isDefault": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "(MacOS)GDK Build & Run",
+      "type": "shell",
+      "command": "make GDK=${env:GDK} release && open -a OpenEMU ${workspaceFolder}/out/rom.bin",
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": [],
+      "options": {
+        "env": {
+          "PATH": "/opt/homebrew/opt/openjdk/bin:${env:PATH}"
+        }
+      }
+    },
+    {
+      "label": "(MacOS)GDK Clean, Build & Run",
+      "dependsOn": [
+        "(MacOS)GDK Clean",
+        "(MacOS)GDK Build & Run"
+      ],
+      "dependsOrder": "sequence",
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": []
+    }
+  ]
+}
