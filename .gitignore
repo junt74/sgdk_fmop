@@ -28,3 +28,5 @@ scripts/rg35xx/deploy-sp.sh
 scripts/rg35xx/deploy-plus.sh
 scripts/rg35xx/deploy-sp.ps1
 scripts/rg35xx/deploy-plus.ps1
+
+scripts/

@@ -46,13 +46,14 @@ static void apply_slot_from_op(u8 ch, u8 sl, const FmOpParams *op)
 
 static void apply_patch_to_channel(const FmPatch *patch, u8 ch)
 {
+    static const u8 slot_map[4] = {0u, 2u, 1u, 3u};
     u8 i;
 
     mds_write_ch(ch, 0xB0, (u8)(((patch->fb & 7u) << 3) | (patch->alg & 7u)));
     mds_write_ch(ch, 0xB4, 0xC0);
 
     for (i = 0u; i < 4u; i++)
-        apply_slot_from_op(ch, i, &patch->op[i]);
+        apply_slot_from_op(ch, slot_map[i], &patch->op[i]);
 }
 
 static void apply_midi_pitch(u8 ch, u8 midi)
