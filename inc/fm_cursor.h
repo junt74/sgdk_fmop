@@ -5,8 +5,8 @@
 
 #include "fm_display.h"
 
-/** カーソルスプライト用パレット（数値テキスト PAL0 とは別ライン。将来 PAL0 兼用も可）。 */
-#define FM_CURSOR_PALETTE PAL2
+/** カーソル PNG（`pal_cursor_digit`）は nibbles 都合で専用ライン。本体内の他 UI は PAL1。 */
+#define FM_CURSOR_PALETTE PAL3
 
 void fm_cursor_init(void);
 

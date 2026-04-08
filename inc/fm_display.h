@@ -41,19 +41,17 @@ extern const u16 fm_op_col_x[FM_OP_NUM_COLS];
 extern const u8 fm_op_val_width[FM_OP_NUM_COLS];
 
 /**
- * パラメータ名テキスト用パレット。
- * 数値テキストは `fm_display_draw` 内で PAL0（`VDP_setTextPalette(PAL0)`）を使用している。
- * カーソルスプライト（`res/cursor_*digit.png`）はファイル間で同一パレットであり、数値テキスト用の PAL0 と CRAM 上の 1 本のパレットラインとして併用できる。
+ * アルゴリズム図（arg.png）、数値、NOTE の値部、エンベロープ、カーソル（下位 nib を避けた重ね）、既定テキスト。
+ * 初期色は arg.png の `pal_alg`（OP 輪郭はインデックス 2〜5 をエンベロ折れ線と共用する想定）。
+ * 15 番は白に上書き（数値・NOTE 値）。10 番はエンベロ背景・画面クリア（`fm_envelope_init` で #000）。
+ * カーソル PNG は nibbles が別系なので **PAL3** のみ使用（`fm_cursor.h`）。
  */
-#define FM_LABEL_PALETTE PAL1
-/** `FM_LABEL_PALETTE` のカラー 15（前景）。CRAM インデックス = パレット番号×16+15。 */
-#define FM_LABEL_PALETTE_TEXT_CRAM_INDEX ((u16)(FM_LABEL_PALETTE * 16u + 15u))
+#define FM_MAIN_PALETTE PAL1
 /**
- * NOTE 行専用。ラベルは PAL1 の色 15 を #444 にしているが、描画ループ末尾で CRAM がその状態に
- * 戻るため、同じ色 15 を一時的に白へ切り替える方法ではフレーム全体が #444 になり見えない。
- * PAL3 の色 15 だけ白に固定し、`VDP_drawTextEx` でこのパレットを指定する。
+ * パラメータ名ラベルのみ（「NOTE: 」プレフィックス、「ALG FB」「AR DR …」など）。
  */
-#define FM_NOTE_PALETTE PAL3
+#define FM_LABEL_PALETTE PAL2
+#define FM_LABEL_PALETTE_TEXT_CRAM_INDEX ((u16)(FM_LABEL_PALETTE * 16u + 15u))
 
 /** FM 音色パッチ（OP 列は MDSDRV-mml コメント行の並びと同一）。 */
 typedef struct
@@ -78,7 +76,7 @@ typedef struct
     FmOpParams op[4];
 } FmPatch;
 
-/** `palette_grey` を `FM_LABEL_PALETTE` に複製し、カラー 15 を #444（RGB #444444）に設定。 */
+/** PAL1←arg.png＋全体用色、PAL2←grey＋ラベル #444。 */
 void fm_display_palette_init(void);
 
 void fm_display_draw(const FmPatch *patch);
