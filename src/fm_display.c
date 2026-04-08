@@ -2,14 +2,21 @@
 #include <string.h>
 
 #include "fm_display.h"
+#include "fm_confirm_note.h"
 
 /** パラメータラベル前景色（#444 → #444444、SGDK 9bit 色へ変換）。 */
 #define FM_LABEL_TEXT_RGB24 0x444444u
+/** 確認ノート行の前景色（#FFF）。 */
+#define FM_NOTE_TEXT_RGB24 0xFFFFFFu
+/** ノート行の描画幅（短い文字列時に右側をスペースで上書きしてゴストを消す）。 */
+#define FM_NOTE_LINE_WIDTH 16u
 
 void fm_display_palette_init(void)
 {
     PAL_setPalette(FM_LABEL_PALETTE, palette_grey, CPU);
     PAL_setColor(FM_LABEL_PALETTE_TEXT_CRAM_INDEX, RGB24_TO_VDPCOLOR(FM_LABEL_TEXT_RGB24));
+    PAL_setPalette(FM_NOTE_PALETTE, palette_grey, CPU);
+    PAL_setColor((u16)(FM_NOTE_PALETTE * 16u + 15u), RGB24_TO_VDPCOLOR(FM_NOTE_TEXT_RGB24));
 }
 
 /**
@@ -30,12 +37,28 @@ const u8 fm_op_val_width[FM_OP_NUM_COLS] = {
 void fm_display_draw(const FmPatch *patch)
 {
     char buf[16];
+    char note_line[20];
     u16 x = FM_DISPLAY_OFFSET_X;
     u16 y = FM_DISPLAY_OFFSET_Y;
 
     VDP_setTextPalette(FM_LABEL_PALETTE);
-    sprintf(buf, "@0 fm %u %u", patch->alg, patch->fb);
-    VDP_drawText(buf, x, y);
+    fm_confirm_note_format(note_line, sizeof(note_line));
+    {
+        u16 len = (u16)strlen(note_line);
+        while (len < FM_NOTE_LINE_WIDTH)
+            note_line[len++] = ' ';
+        note_line[len] = '\0';
+    }
+    {
+        const u16 label_basetile = TILE_ATTR(FM_LABEL_PALETTE, VDP_getTextPriority(), FALSE, FALSE);
+        const u16 value_basetile = TILE_ATTR(FM_NOTE_PALETTE, VDP_getTextPriority(), FALSE, FALSE);
+        const char saved = note_line[FM_NOTE_PREFIX_LEN];
+        note_line[FM_NOTE_PREFIX_LEN] = '\0';
+        VDP_drawTextEx(VDP_getTextPlane(), note_line, label_basetile, x, y, CPU);
+        note_line[FM_NOTE_PREFIX_LEN] = saved;
+        VDP_drawTextEx(VDP_getTextPlane(), note_line + FM_NOTE_PREFIX_LEN, value_basetile,
+                         x + FM_NOTE_PREFIX_LEN, y, CPU);
+    }
     y++;
 
     VDP_drawText("ALG FB", x, y);

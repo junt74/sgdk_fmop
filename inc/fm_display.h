@@ -5,7 +5,11 @@
 
 /** 画面全体の表示原点（タイル座標）。ビルド後に実機で調整する。 */
 #define FM_DISPLAY_OFFSET_X 2u
-#define FM_DISPLAY_OFFSET_Y 1u
+#define FM_DISPLAY_OFFSET_Y 4u
+/** `fm_confirm_note_format` の「NOTE: 」の文字数（`"NOTE: %s%u"` のプレフィックス）。カーソル位置と共有。 */
+#define FM_NOTE_PREFIX_LEN 6u
+/** 確認ノートの値表示部（音名＋オクターブ）の最大タイル数。カーソル幅に使用。 */
+#define FM_NOTE_VALUE_TILES 3u
 
 /**
  * 数値列幅（右詰め `%*u` 用）。最小値・最大値・十進桁数の根拠は docs/display_layout.md。
@@ -44,6 +48,12 @@ extern const u8 fm_op_val_width[FM_OP_NUM_COLS];
 #define FM_LABEL_PALETTE PAL1
 /** `FM_LABEL_PALETTE` のカラー 15（前景）。CRAM インデックス = パレット番号×16+15。 */
 #define FM_LABEL_PALETTE_TEXT_CRAM_INDEX ((u16)(FM_LABEL_PALETTE * 16u + 15u))
+/**
+ * NOTE 行専用。ラベルは PAL1 の色 15 を #444 にしているが、描画ループ末尾で CRAM がその状態に
+ * 戻るため、同じ色 15 を一時的に白へ切り替える方法ではフレーム全体が #444 になり見えない。
+ * PAL3 の色 15 だけ白に固定し、`VDP_drawTextEx` でこのパレットを指定する。
+ */
+#define FM_NOTE_PALETTE PAL3
 
 /** FM 音色パッチ（OP 列は MDSDRV-mml コメント行の並びと同一）。 */
 typedef struct

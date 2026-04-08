@@ -2,6 +2,8 @@
 
 #include "fm_display.h"
 #include "fm_cursor.h"
+#include "fm_alg_icon.h"
+#include "fm_confirm_note.h"
 
 int main()
 {
@@ -24,7 +26,10 @@ int main()
     SPR_init();
 
     fm_display_palette_init();
+    fm_confirm_note_init();
     fm_cursor_init();
+    fm_alg_icon_init();
+    fm_alg_icon_set(patch.alg);
     fm_display_draw(&patch);
 
     u16 joy_prev = 0u;
@@ -32,9 +37,22 @@ int main()
     while (1)
     {
         const u16 joy = JOY_readJoypad(JOY_1);
-        if (fm_cursor_step(joy, joy_prev, &patch))
+        bool redraw = FALSE;
+        if (joy & BUTTON_B)
+        {
+            redraw = fm_confirm_note_step(joy, joy_prev);
+            fm_cursor_refresh_sprite_on_note_row();
+        }
+        else
+        {
+            if (fm_cursor_step(joy, joy_prev, &patch))
+                redraw = TRUE;
+        }
+        if (redraw)
             fm_display_draw(&patch);
         joy_prev = joy;
+
+        fm_alg_icon_set(patch.alg);
 
         SPR_update();
         SYS_doVBlankProcess();

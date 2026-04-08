@@ -22,7 +22,7 @@
     {
       "label": "GDK Build & Run",
       "type": "shell",
-      "command": "${env:GDK}\\bin\\make -f makefile release && \"${env:REGEN}\\regen.exe\" \"${workspaceFolder}\\out\\rom.bin\"",
+      "command": "${env:GDK}\\bin\\make -f makefile release && \"${env:REGEN}\\regen.exe\" \"${workspaceFolder}\\out\\FMOP.bin\"",
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -62,7 +62,7 @@
     {
       "label": "(MacOS)GDK Build & Run",
       "type": "shell",
-      "command": "make GDK=${env:GDK} release && open -a OpenEMU ${workspaceFolder}/out/rom.bin",
+      "command": "make GDK=${env:GDK} release && open -a OpenEMU ${workspaceFolder}/out/FMOP.bin",
       "group": {
         "kind": "build",
         "isDefault": false

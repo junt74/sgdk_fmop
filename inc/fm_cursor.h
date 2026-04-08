@@ -20,4 +20,9 @@ bool fm_cursor_step(u16 joy, u16 joy_prev, FmPatch *patch);
 /** スプライト定義・座標を現在のセルに合わせる。 */
 void fm_cursor_refresh_sprite(void);
 
+/**
+ * B 押下中に `main` から呼ぶ。ノート値（NOTE 行・プレフィックス直後）に 3 タイル幅カーソルを合わせる。
+ */
+void fm_cursor_refresh_sprite_on_note_row(void);
+
 #endif

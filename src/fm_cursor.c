@@ -132,6 +132,15 @@ void fm_cursor_refresh_sprite(void)
     SPR_setPosition(s_cursor, (s16)(cursor_left_tile_x() * 8u), (s16)(cursor_value_row_tile_y() * 8u));
 }
 
+void fm_cursor_refresh_sprite_on_note_row(void)
+{
+    const u16 bx = FM_DISPLAY_OFFSET_X;
+    const u16 tx = bx + FM_NOTE_PREFIX_LEN;
+    SPR_setDefinition(s_cursor, sprite_def_for_digits(FM_NOTE_VALUE_TILES));
+    SPR_setPriority(s_cursor, FALSE);
+    SPR_setPosition(s_cursor, (s16)(tx * 8u), (s16)(FM_DISPLAY_OFFSET_Y * 8u));
+}
+
 bool fm_cursor_step(u16 joy, u16 joy_prev, FmPatch *patch)
 {
     const u16 pressed = (u16)(joy & (u16)~joy_prev);
