@@ -21,9 +21,26 @@
 #define FM_VAL_WIDTH_K 1u
 #define FM_VAL_WIDTH_ML 2u
 #define FM_VAL_WIDTH_DT 1u
+/** SSG 数値表示は 3 桁（`%03u`、中身は `ssg_hi*100+ssg_lo`）。 */
 #define FM_VAL_WIDTH_SSG 3u
+/** カーソル用: SSG の 100 の位列（幅 1 タイル）。 */
+#define FM_VAL_WIDTH_SSG_HI 1u
+/** カーソル用: SSG の 10・1 の位列（幅 2 タイル、値 0〜15 → 表示 `00`〜`15`）。 */
+#define FM_VAL_WIDTH_SSG_LO 2u
 
-/** パラメータ名テキスト用パレット（PAL0 は数値の既定表示用）。 */
+/** OP 論理列数（表示上の SSG は 3 桁 1 ブロックだが、カーソルは 100 の位と下 2 桁で分離）。 */
+#define FM_OP_NUM_COLS 11u
+
+/** OP 数値列の先頭タイル X（`fm_display_draw` / カーソル位置と共有）。 */
+extern const u16 fm_op_col_x[FM_OP_NUM_COLS];
+/** OP 各列の数値表示幅（文字数）。 */
+extern const u8 fm_op_val_width[FM_OP_NUM_COLS];
+
+/**
+ * パラメータ名テキスト用パレット。
+ * 数値テキストは `fm_display_draw` 内で PAL0（`VDP_setTextPalette(PAL0)`）を使用している。
+ * カーソルスプライト（`res/cursor_*digit.png`）はファイル間で同一パレットであり、数値テキスト用の PAL0 と CRAM 上の 1 本のパレットラインとして併用できる。
+ */
 #define FM_LABEL_PALETTE PAL1
 /** `FM_LABEL_PALETTE` のカラー 15（前景）。CRAM インデックス = パレット番号×16+15。 */
 #define FM_LABEL_PALETTE_TEXT_CRAM_INDEX ((u16)(FM_LABEL_PALETTE * 16u + 15u))
@@ -34,9 +51,13 @@ typedef struct
     union {
         struct
         {
-            u8 ar, dr, sr, rr, sl, tl, k, ml, dt, ssg;
+            u8 ar, dr, sr, rr, sl, tl, k, ml, dt;
+            /** 十進 100 の位（0/1）。1 のとき MML では +100（AM）。 */
+            u8 ssg_hi;
+            /** SSG-EG 0〜15（下 2 桁、`%03u` で 00〜15）。 */
+            u8 ssg_lo;
         };
-        u8 raw[10];
+        u8 raw[FM_OP_NUM_COLS];
     };
 } FmOpParams;
 

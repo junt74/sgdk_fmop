@@ -66,17 +66,30 @@ src/rom_header.c: src/boot/rom_head.c
 	@$(MKDIR) -p src
 	$(CP) src/boot/rom_head.c src/rom_header.c
 SRC_C := $(filter-out src/boot/rom_head.c,$(SRC_C))
-OBJS := $(filter-out $(OUT_DIR)/src/boot/rom_head.o,$(OBJS))
+OBJS := $(filter-out $(OUT)/src/boot/rom_head.o,$(OBJS))
+# src/boot/sega.s が rom_head.bin 経由で rom_header を内包するため、コピーした rom_header.c はリンクしない
+SRC_C := $(filter-out $(SRC)/rom_header.c,$(SRC_C))
+OBJS := $(filter-out $(OUT)/src/rom_header.o,$(OBJS))
 endif
 
 # (2) Windows 以外（外部 m68k-elf-gcc 使用時）: SGDK の libmd.a は LTO 13 でビルド済みのため、
 #     Homebrew 等の GCC 15 ではリンク時に LTO バージョン不一致になる。リンク時のみ -fno-lto にする。
 ifneq ($(OS),Windows_NT)
-$(OUT_DIR)/rom.out: $(OUT_DIR)/sega.o $(OUT_DIR)/cmd_ $(LIBMD)
+$(OUT)/rom.out: $(OUT)/sega.o $(OUT)/cmd_ $(LIBMD)
 	@$(MKDIR) -p $(dir $@)
-	$(CC) -m68000 -B$(BIN) -n -T $(GDK)/md.ld -nostdlib $(OUT_DIR)/sega.o @$(OUT_DIR)/cmd_ $(LIBMD) $(LIBGCC) -o $(OUT_DIR)/rom.out -Wl,--gc-sections -fno-lto
-	@$(RM) $(OUT_DIR)/cmd_
+	$(CC) -m68000 -B$(BIN) -n -T $(GDK)/md.ld -nostdlib $(OUT)/sega.o @$(OUT)/cmd_ $(LIBMD) $(LIBGCC) -o $(OUT)/rom.out -Wl,--gc-sections -fno-lto
+	@$(RM) $(OUT)/cmd_
 endif
+
+# ============================================================
+#  最終 ROM ファイル名（SGDK 既定の rom.bin に padROM 後コピーして配布用名にする）
+# ============================================================
+RELEASE_ROM = $(OUT)/FMOP.bin
+
+# makefile.gen の padROM を上書き: sizebnd 後に配布用ファイル名へ複製（警告は無視してよい）。
+padROM: $(OUT)/rom.bin
+	$(SIZEBND) $(OUT)/rom.bin -sizealign 131072 -checksum
+	$(CP) $(OUT)/rom.bin $(RELEASE_ROM)
 
 # ============================================================
 #  追加ターゲット: ビルド成功後にエミュレータで ROM を起動
@@ -85,7 +98,7 @@ endif
 #  macOS: デフォルトは OpenEMU で開く。別アプリにしたい場合は make run EMU="open -a アプリ名" 等で上書き可能。
 # ============================================================
 
-ROM_PATH = out/rom.bin
+ROM_PATH = out/FMOP.bin
 ifeq ($(OS),Windows_NT)
 # EMU は未設定のまま。make run EMU="C:/path/to/Fusion.exe" のように指定する
 else

@@ -13,15 +13,18 @@ void fm_display_palette_init(void)
 }
 
 /**
- * OP 数値列の先頭タイル X（`… K ML DT SSG` 相当の間隔で配置）。
- * パラメータ名行のみ `MLDT` と表示するため、ラベル「MLDT」と数値列の横位置は一致しない。
+ * OP 数値列の先頭タイル X。SSG は画面上 3 桁で `fm_op_col_x[9]` から描画。
+ * `[9]`＝100 の位のカーソル、`[10]`＝10・1 の位（2 タイル）のカーソル左端。
  */
-static const u16 OP_COL_X[10] = {0u, 3u, 6u, 9u, 12u, 15u, 19u, 21u, 24u, 26u};
+const u16 fm_op_col_x[FM_OP_NUM_COLS] = {
+    0u, 3u, 6u, 9u, 12u, 15u, 19u, 21u, 24u, 26u, 27u,
+};
 
-/** 各 OP パラメータの数値表示幅（AR … SSG の順、fm_display.h の FM_VAL_WIDTH_* と一致）。 */
-static const u8 OP_VAL_WIDTH[10] = {
+/** カーソル／内部用の列幅（SSG は末尾 2 要素が 100 の位・下 2 桁）。 */
+const u8 fm_op_val_width[FM_OP_NUM_COLS] = {
     FM_VAL_WIDTH_AR, FM_VAL_WIDTH_DR, FM_VAL_WIDTH_SR, FM_VAL_WIDTH_RR, FM_VAL_WIDTH_SL,
-    FM_VAL_WIDTH_TL, FM_VAL_WIDTH_K, FM_VAL_WIDTH_ML, FM_VAL_WIDTH_DT, FM_VAL_WIDTH_SSG,
+    FM_VAL_WIDTH_TL, FM_VAL_WIDTH_K, FM_VAL_WIDTH_ML, FM_VAL_WIDTH_DT,
+    FM_VAL_WIDTH_SSG_HI, FM_VAL_WIDTH_SSG_LO,
 };
 
 void fm_display_draw(const FmPatch *patch)
@@ -53,10 +56,15 @@ void fm_display_draw(const FmPatch *patch)
     for (u16 row = 0; row < 4; row++)
     {
         const FmOpParams *op = &patch->op[row];
-        for (u16 c = 0; c < 10; c++)
+        for (u16 c = 0u; c < 9u; c++)
         {
-            sprintf(buf, "%*u", (int)OP_VAL_WIDTH[c], (unsigned)op->raw[c]);
-            VDP_drawText(buf, x + OP_COL_X[c], y);
+            sprintf(buf, "%*u", (int)fm_op_val_width[c], (unsigned)op->raw[c]);
+            VDP_drawText(buf, x + fm_op_col_x[c], y);
+        }
+        {
+            const u16 ssg3 = (u16)op->ssg_hi * 100u + (u16)op->ssg_lo;
+            sprintf(buf, "%03u", (unsigned)ssg3);
+            VDP_drawText(buf, x + fm_op_col_x[9], y);
         }
         y++;
     }
