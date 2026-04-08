@@ -3,6 +3,9 @@ bin/
 obj/
 *.bin
 !out/FMOP.bin
+!res/mds/*.bin
+
+third_party/
 *.lst
 *.map
 *.s19

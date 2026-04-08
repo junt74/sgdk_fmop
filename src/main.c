@@ -5,6 +5,11 @@
 #include "fm_alg_icon.h"
 #include "fm_confirm_note.h"
 #include "fm_preview.h"
+#include "mdsdrv.h"
+#include "mdsdat.h"
+#include "z80_ctrl.h"
+
+static void mds_vint(void) { MDS_update(); }
 
 int main()
 {
@@ -25,6 +30,11 @@ int main()
 
     JOY_init();
     SPR_init();
+
+    Z80_unloadDriver();
+    if (MDS_init(mdsseqdat, mdspcmdat) != 0)
+        VDP_drawText("MDS_init failed", 2, 2);
+    SYS_setVIntCallback(mds_vint);
 
     fm_display_palette_init();
     fm_preview_init();

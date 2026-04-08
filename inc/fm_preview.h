@@ -5,12 +5,12 @@
 
 #include "fm_display.h"
 
-/** 復号 YM2612・Z80 バスを前提に 1 チャンネルで試聴用 FM を用意する。 */
+/** 試聴状態の初期化（`MDS_init` 後に呼ぶ）。 */
 void fm_preview_init(void);
 
 /**
- * 毎フレーム呼ぶ。A 押下中のみ指定ノートで発音し、離すとキーオフ。
- * @param joy, joy_prev パッド（エッジ検出用）
+ * A 押下中: MDSDRV の FM コマンドで現在パッチ・NOTE 行の音程を ch2 に発音。
+ * A 離し: キーオフ。シーケンサと競合しないよう試聴中は全 `MDS_request` を止める。
  */
 void fm_preview_frame(const FmPatch *patch, u16 joy, u16 joy_prev);
 

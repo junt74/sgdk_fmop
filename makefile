@@ -47,6 +47,10 @@ EXTRA_FLAGS := -Wno-unterminated-string-initialization
 # SGDK 共通設定を include
 include $(GDK)/makefile.gen
 
+# MDSDRV: ResComp が生成する res/mdsdat.h より先に C をコンパイルしないよう依存を明示
+$(OUT)/src/main.o: res/mdsdat.h
+$(OUT)/src/mdsdrv.o: res/mdsdat.h
+
 # macOS: /usr/bin/java はスタブのため Homebrew の java を明示指定（"Unable to locate a Java Runtime" 対策）
 ifneq ($(OS),Windows_NT)
 JAVA_HOMEBREW := $(shell brew --prefix openjdk 2>/dev/null)
