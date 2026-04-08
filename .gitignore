@@ -22,3 +22,9 @@ third_party/
 .DS_Store
 
 .vscode/
+
+# RG35XX 転送（.example をコピーした個人用スクリプト・機種別 IP 等を直書きする場合）
+scripts/rg35xx/deploy-sp.sh
+scripts/rg35xx/deploy-plus.sh
+scripts/rg35xx/deploy-sp.ps1
+scripts/rg35xx/deploy-plus.ps1

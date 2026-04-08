@@ -5,6 +5,7 @@
 #include "fm_alg_icon.h"
 #include "fm_confirm_note.h"
 #include "fm_preview.h"
+#include "fm_envelope.h"
 #include "mdsdrv.h"
 #include "mdsdat.h"
 #include "z80_ctrl.h"
@@ -41,6 +42,7 @@ int main()
     fm_confirm_note_init();
     fm_cursor_init();
     fm_alg_icon_init();
+    fm_envelope_init();
     fm_alg_icon_set(patch.alg);
     fm_display_draw(&patch);
 

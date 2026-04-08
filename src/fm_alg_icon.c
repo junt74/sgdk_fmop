@@ -1,7 +1,7 @@
 #include <genesis.h>
 
 #include "fm_alg_icon.h"
-#include "fm_cursor.h"
+#include "fm_display.h"
 #include "resources.h"
 
 /** 1 フレーム幅（px）。6 タイル × 8px。 */
@@ -21,7 +21,7 @@ void fm_alg_icon_init(void)
                         (int)(FM_ALG_ICON_SHIFT_LEFT_TILES * 8u));
     const s16 y = (s16)FM_ALG_ICON_PAD_T;
 
-    s_alg = SPR_addSprite(&spr_alg, x, y, TILE_ATTR(FM_CURSOR_PALETTE, FALSE, FALSE, FALSE));
+    s_alg = SPR_addSprite(&spr_alg, x, y, TILE_ATTR(FM_MAIN_PALETTE, FALSE, FALSE, FALSE));
     SPR_setVisibility(s_alg, VISIBLE);
     SPR_setPriority(s_alg, FALSE);
 }
