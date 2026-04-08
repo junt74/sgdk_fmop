@@ -5,8 +5,14 @@
 
 /** FB 数値列の `fm_display_draw` における X オフセット（タイル）。 */
 #define FM_GLOBAL_FB_X_OFF 4u
+/** `C`＋十字の値変更: 初回後、リピート開始までの待ちフレーム数。 */
+#define FM_CURSOR_VALUE_REPEAT_DELAY 20u
+/** `C`＋十字: リピート間隔（フレーム）。 */
+#define FM_CURSOR_VALUE_REPEAT_INT 10u
 
 static Sprite *s_cursor;
+/** `C`＋十字のオートリピート用（0＝カウント中以外）。 */
+static u8 s_value_repeat_countdown;
 
 static struct
 {
@@ -83,6 +89,36 @@ static void u8_add_clamp(u8 *v, int delta, u8 maxv)
     *v = (u8)n;
 }
 
+/** @return 単一方向のとき ±10 / ±1、対角・中立は 0。 */
+static int value_delta_from_joy(u16 joy)
+{
+    const u16 du = (u16)(joy & (u16)BUTTON_UP);
+    const u16 dd = (u16)(joy & (u16)BUTTON_DOWN);
+    const u16 dl = (u16)(joy & (u16)BUTTON_LEFT);
+    const u16 dr = (u16)(joy & (u16)BUTTON_RIGHT);
+
+    if (du && !(dd | dl | dr))
+        return 10;
+    if (dd && !(du | dl | dr))
+        return -10;
+    if (dr && !(du | dd | dl))
+        return 1;
+    if (dl && !(du | dd | dr))
+        return -1;
+    return 0;
+}
+
+/** `C` と十字のいずれかが今フレーム新たに押された。 */
+static bool value_combo_edge(u16 joy, u16 joy_prev)
+{
+    const u16 p = (u16)(joy & (u16)~joy_prev);
+    const u16 dir = (u16)((u16)BUTTON_UP | (u16)BUTTON_DOWN | (u16)BUTTON_LEFT | (u16)BUTTON_RIGHT);
+
+    if (!(joy & BUTTON_C) || value_delta_from_joy(joy) == 0)
+        return FALSE;
+    return ((p & dir) != 0u) || ((p & (u16)BUTTON_C) != 0u);
+}
+
 /** @return 値が変化したとき真 */
 static bool patch_adjust_at_cursor(FmPatch *patch, int delta)
 {
@@ -111,6 +147,7 @@ static bool patch_adjust_at_cursor(FmPatch *patch, int delta)
 
 void fm_cursor_init(void)
 {
+    s_value_repeat_countdown = 0u;
     s_cur.on_op = FALSE;
     s_cur.g_slot = 0u;
     s_cur.op_row = 0u;
@@ -148,20 +185,33 @@ bool fm_cursor_step(u16 joy, u16 joy_prev, FmPatch *patch)
 
     if ((joy & BUTTON_C) && patch != NULL)
     {
-        int delta = 0;
-        if (pressed & BUTTON_UP)
-            delta = 10;
-        else if (pressed & BUTTON_DOWN)
-            delta = -10;
-        else if (pressed & BUTTON_RIGHT)
-            delta = 1;
-        else if (pressed & BUTTON_LEFT)
-            delta = -1;
-        if (delta != 0)
-            dirty = patch_adjust_at_cursor(patch, delta);
+        const int delta = value_delta_from_joy(joy);
+
+        if (delta == 0)
+            s_value_repeat_countdown = 0u;
+        else if (value_combo_edge(joy, joy_prev))
+        {
+            if (patch_adjust_at_cursor(patch, delta))
+                dirty = TRUE;
+            s_value_repeat_countdown = FM_CURSOR_VALUE_REPEAT_DELAY;
+        }
+        else
+        {
+            if (s_value_repeat_countdown > 0u)
+            {
+                s_value_repeat_countdown--;
+                if (s_value_repeat_countdown == 0u)
+                {
+                    if (patch_adjust_at_cursor(patch, delta))
+                        dirty = TRUE;
+                    s_value_repeat_countdown = FM_CURSOR_VALUE_REPEAT_INT;
+                }
+            }
+        }
     }
     else
     {
+        s_value_repeat_countdown = 0u;
         if (pressed & BUTTON_LEFT)
         {
             if (!s_cur.on_op)

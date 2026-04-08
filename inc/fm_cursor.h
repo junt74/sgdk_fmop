@@ -11,8 +11,9 @@
 void fm_cursor_init(void);
 
 /**
- * `C` 非押下: D-Pad でセル移動（エッジ検出: `joy` と `joy_prev`）。
- * `C` 押下中: D-Pad でカーソル位置の数値を変更（UP +10、DOWN -10、RIGHT +1、LEFT -1、範囲内にクランプ）。
+ * `C` 非押下、または `C`＋十字の組み合わせで数値変更にならないとき: D-Pad でセル移動（エッジ検出）。
+ * `C` 押下中かつ十字単独入力: カーソル位置の数値を変更（UP +10、DOWN -10、RIGHT +1、LEFT -1、クランプ）。
+ * 押しっぱなしは初回のあと 20 フレーム待ち、以降 10 フレーム間隔でリピート。
  * @return パッチ数値を変更したとき真（画面の再描画が必要）。
  */
 bool fm_cursor_step(u16 joy, u16 joy_prev, FmPatch *patch);

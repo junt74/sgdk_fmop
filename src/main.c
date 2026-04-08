@@ -4,6 +4,7 @@
 #include "fm_cursor.h"
 #include "fm_alg_icon.h"
 #include "fm_confirm_note.h"
+#include "fm_preview.h"
 
 int main()
 {
@@ -26,6 +27,7 @@ int main()
     SPR_init();
 
     fm_display_palette_init();
+    fm_preview_init();
     fm_confirm_note_init();
     fm_cursor_init();
     fm_alg_icon_init();
@@ -50,6 +52,8 @@ int main()
         }
         if (redraw)
             fm_display_draw(&patch);
+
+        fm_preview_frame(&patch, joy, joy_prev);
         joy_prev = joy;
 
         fm_alg_icon_set(patch.alg);
